@@ -61,7 +61,7 @@ body {
     font-size: 3vmin;
 }
 .msgc{
-     height: 100vmin;
+     height: 20vmin;
   display: flex;
   justify-content: center;
   align-items: center;
