@@ -263,7 +263,7 @@
         const weatherIcon = document.querySelector("#weather-icon");
 
         async function checkWeather(city) {
-            const response = await fetch(apiURL + city + `&appid=${apiKey}`);
+            const response = await fetch(apiURL + city.trim() + `&appid=${apiKey}`);
 
             if (response.status == 404) {
                 document.querySelector("#error").style.display = "block";
