@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://www.freeiconspng.com/thumbs/weather-icon-png/weather-icon-png-2.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-900">
+    <div class="max-w-md mx-auto bg-gradient-to-br from-teal-400 to-indigo-600 text-white mt-20 rounded-2xl p-8 text-center">
+
+        <!-- Search Section -->
+        <div class="flex items-center justify-center mb-6">
+            <input id="location-input" type="text" placeholder="Enter City Name" spellcheck="false" class="flex-1 p-4 rounded-full text-gray-700 mr-4 outline-none">
+            <button id="search-btn" class="bg-white rounded-full p-4 flex items-center justify-center">
+            <i class="fas fa-search text-gray-500"></i>
+            </button>
+
+        </div>
+        <div id="error" class="text-left text-red-600 hidden">
+            <p>Invalid City Name</p>
+        </div>
+        <!-- Weather Section -->
+        <div id="weather" class="hidden">
+            <img src="images/rain.png" id="weather-icon" class="w-32 mx-auto mb-4" alt="Weather Icon">
+            <h1 id="temp" class="text-6xl font-semibold mb-2">22°C</h1>
+            <h2 id="city" class="text-4xl font-medium">New York</h2>
+            <div class="flex justify-between items-center mt-6">
+                <div class="flex items-center">
+                    <img src="images/humidity.png" class="w-10 h-10 mr-2" alt="Humidity Icon">
+                    <div>
+                        <p id="humidity" class="text-xl font-semibold">50%</p>
+                        <p class="text-sm">Humidity</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <img src="images/wind.png" class="w-10 h-10 mr-2" alt="Wind Speed Icon">
+                    <div>
+                        <p id="wind" class="text-xl font-semibold">15 km/h</p>
+                        <p class="text-sm">Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const countryNames = {
+  AD: "Andorra",
+  AE: "United Arab Emirates",
+  AF: "Afghanistan",
+  AG: "Antigua and Barbuda",
+  AL: "Albania",
+  AM: "Armenia",
+  AN: "Netherlands Antilles", // This territory is no longer operational
+  AO: "Angola",
+  AQ: "Antarctica",
+  AR: "Argentina",
+  AU: "Australia",
+  AZ: "Azerbaijan",
+  BA: "Bosnia and Herzegovina",
+  BB: "Barbados",
+  BD: "Bangladesh",
+  BE: "Belgium",
+  BG: "Bulgaria",
+  BH: "Bahrain",
+  BI: "Burundi",
+  BM: "Bermuda",
+  BN: "Brunei Darussalam",
+  BO: "Bolivia",
+  BR: "Brazil",
+  BS: "Bahamas",
+  BV: "Bouvet Island",
+  BW: "Botswana",
+  BY: "Belarus",
+  BZ: "Belize",
+  CA: "Canada",
+  CD: "Democratic Republic of the Congo",
+  CF: "Central African Republic",
+  CH: "Switzerland",
+  CL: "Chile",
+  CN: "China",
+  CO: "Colombia",
+  CR: "Costa Rica",
+  CU: "Cuba",
+  CV: "Cape Verde",
+  CY: "Cyprus",
+  CZ: "Czech Republic",
+  DJ: "Djibouti",
+  DK: "Denmark",
+  DO: "Dominican Republic",
+  DZ: "Algeria",
+  EC: "Ecuador",
+  EE: "Estonia",
+  EG: "Egypt",
+  ER: "Eritrea", // Added Eritrea
+  ES: "Spain", // Added Spain (EUR currency)
+  ET: "Ethiopia",
+  FI: "Finland", // Added Finland (EUR currency)
+  FJ: "Fiji",
+  FK: "Falkland Islands (Malvinas)",
+  FR: "France", // Added France (EUR currency)
+  GA: "Gabon", // Added Gabon
+  GB: "United Kingdom",
+  GD: "Grenada", // Added Grenada
+  GE: "Georgia",
+  GG: "Guernsey",
+  GH: "Ghana",
+  GI: "Gibraltar",
+  GM: "The Gambia",
+  GN: "Guinea",
+  GT: "Guatemala",
+  GW: "Guinea-Bissau", // Added Guinea-Bissau
+  GY: "Guyana",
+  HK: "Hong Kong",
+  HN: "Honduras",
+  HR: "Croatia",
+  HT: "Haiti",
+  HU: "Hungary",
+  ID: "Indonesia",
+  IE: "Ireland", // Added Ireland (EUR currency)
+  IL: "Israel",
+  IN: "India",
+  IQ: "Iraq",
+  IR: "Iran (Islamic Republic of)",
+  IS: "Iceland",
+  IT: "Italy", // Added Italy (EUR currency)
+  JM: "Jamaica",
+  JO: "Jordan",
+  JP: "Japan",
+  KE: "Kenya",
+  KG: "Kyrgyzstan",
+  KH: "Cambodia",
+  KI: "Kiribati", // Added Kiribati
+  KM: "Comoros",
+  KP: "Democratic People's Republic of Korea",
+  KR: "Republic of Korea",
+  KW: "Kuwait",
+  KY: "Cayman Islands",
+  KZ: "Kazakhstan",
+  LA: "Lao People's Democratic Republic",
+  LB: "Lebanon",
+  LC: "Saint Lucia", // Added Saint Lucia
+  LI: "Liechtenstein", // Added Liechtenstein (CHF currency)
+  LK: "Sri Lanka",
+  LR: "Liberia",
+  LS: "Lesotho",
+  LT: "Lithuania",
+  LU: "Luxembourg", // Added Luxembourg (EUR currency)
+  LV: "Latvia",
+  LY: "Libya",
+  MA: "Morocco",
+  MD: "Republic of Moldova",
+  MG: "Madagascar",
+  MK: "North Macedonia",
+  ML: "Mali", // Added Mali
+  MM: "Myanmar",
+  MN: "Mongolia",
+  MO: "Macao",
+  MR: "Mauritania",
+  MT: "Malta",
+  MU: "Mauritius",
+  MV: "Maldives",
+  MW: "Malawi",
+  MX: "Mexico",
+  MY: "Malaysia",
+  MZ: "Mozambique", // Added Mozambique
+  NA: "Namibia",
+  NC: "New Caledonia",
+  NE: "Niger",
+  NF: "Norfolk Island",
+  NG: "Nigeria",
+  NI: "Nicaragua",
+  NL: "Netherlands",
+  NO: "Norway",
+  NP: "Nepal",
+  NR: "Nauru",
+  NU: "Niue",
+  NZ: "New Zealand",
+  OM: "Oman",
+  PA: "Panama",
+  PE: "Peru",
+  PF: "French Polynesia",
+  PG: "Papua New Guinea",
+  PH: "Philippines",
+  PK: "Pakistan",
+  PL: "Poland",
+  PM: "Saint Pierre and Miquelon",
+  PN: "Pitcairn",
+  PR: "Puerto Rico",
+  PT: "Portugal",
+  PW: "Palau",
+  PY: "Paraguay",
+  QA: "Qatar",
+  RE: "Reunion",
+  RO: "Romania",
+  RS: "Serbia",
+  RU: "Russian Federation",
+  RW: "Rwanda",
+  SA: "Saudi Arabia",
+  SB: "Solomon Islands",
+  SC: "Seychelles",
+  SD: "Sudan",
+  SE: "Sweden",
+  SG: "Singapore",
+  SH: "Saint Helena",
+  SI: "Slovenia",
+  SJ: "Svalbard and Jan Mayen Islands",
+  SK: "Slovakia",
+  SL: "Sierra Leone",
+  SM: "San Marino",
+  SN: "Senegal",
+  SO: "Somalia",
+  SR: "Suriname",
+  SS: "South Sudan",
+  ST: "Sao Tome and Principe",
+  SV: "El Salvador",
+  SX: "Sint Maarten (Dutch part)",
+  SY: "Syrian Arab Republic",
+  SZ: "Eswatini",
+  TC: "Turks and Caicos Islands",
+  TD: "Chad",
+  TF: "French Southern Territories",
+  TG: "Togo",
+  TH: "Thailand",
+  TJ: "Tajikistan",
+  TK: "Tokelau",
+  TL: "Timor-Leste",
+  TM: "Turkmenistan",
+  TN: "Tunisia",
+  TO: "Tonga",
+  TR: "Turkey",
+  TT: "Trinidad and Tobago",
+  TV: "Tuvalu",
+  TZ: "Tanzania, United Republic of",
+  UA: "Ukraine",
+  UG: "Uganda",
+  US: "United States of America",
+  UY: "Uruguay",
+  UZ: "Uzbekistan",
+  VA: "Holy See (Vatican City State)",
+  VC: "Saint Vincent and the Grenadines",
+  VE: "Venezuela (Bolivarian Republic of)",
+  VG: "Virgin Islands (British)",
+  VI: "Virgin Islands (U.S.)",
+  VN: "Viet Nam",
+  VU: "Vanuatu",
+  WF: "Wallis and Futuna Islands",
+  WS: "Samoa",
+  YE: "Yemen",
+  YT: "Mayotte",
+  ZA: "South Africa",
+  ZM: "Zambia",
+  ZW: "Zimbabwe"
+};
+
+        const apiKey = "c2fea92f17830f2f578c3f18f2914002"; // Your API Key
+        const apiURL = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+        const searchBox = document.querySelector("#location-input");
+        const searchBtn = document.querySelector("#search-btn");
+        const weatherIcon = document.querySelector("#weather-icon");
+
+        async function checkWeather(city) {
+            const response = await fetch(apiURL + city + `&appid=${apiKey}`);
+
+            if (response.status == 404) {
+                document.querySelector("#error").style.display = "block";
+                document.querySelector("#weather").style.display = "none";
+                return;
+            }
+
+            const data = await response.json();
+            document.querySelector("#city").textContent = data.name + (data.name !== countryNames[data.sys.country] ? ", " + countryNames[data.sys.country] : "");
+            document.querySelector("#temp").textContent = Math.round(data.main.temp) + "°C";
+            document.querySelector("#humidity").textContent = data.main.humidity + "%";
+            document.querySelector("#wind").textContent = data.wind.speed + " km/h";
+
+            switch (data.weather[0].main) {
+                case "Clouds":
+                    weatherIcon.src = "images/clouds.png";
+                    break;
+                case "Clear":
+                    weatherIcon.src = "images/clear.png";
+                    break;
+                case "Rain":
+                    weatherIcon.src = "images/rain.png";
+                    break;
+                case "Drizzle":
+                    weatherIcon.src = "images/drizzle.png";
+                    break;
+                case "Mist":
+                    weatherIcon.src = "images/mist.png";
+                    break;
+                default:
+                    weatherIcon.src = "images/clear.png";
+            }
+
+            document.querySelector("#weather").style.display = "block";
+            document.querySelector("#error").style.display = "none";
+        }
+        searchBtn.addEventListener("click", () => {
+            checkWeather(searchBox.value);
+        });
+searchBox.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    checkWeather(searchBox.value);
+  }
+});
+        
+    </script>
+</body>
+</html>
